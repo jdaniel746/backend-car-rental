@@ -30,8 +30,8 @@ provider:
   region: ${opt:region, 'us-east-2'}
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
-    DYNAMODB_TABLE_USER: User-${self:provider.stage}
-    DYNAMODB_TABLE_ITEM: Item-${self:provider.stage}
+    USERS_TABLE: Users-${self:provider.stage}
+    ITEMS_TABLE: Items-${self:provider.stage}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -41,7 +41,10 @@ provider:
         - dynamodb:GetItem
         - dynamodb:PutItem
         - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE_USER}"
+      Resource: [
+          "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}",
+          "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.ITEMS_TABLE}"
+      ]
 
 functions:
   createUser:
@@ -120,7 +123,7 @@ resources:
     UsersDynamoDbTable:
       Type: 'AWS::DynamoDB::Table'
       Properties:
-        TableName: ${self:provider.environment.DYNAMODB_TABLE_USER}
+        TableName: ${self:provider.environment.USERS_TABLE}
         AttributeDefinitions:
           - AttributeName: userId
             AttributeType: S
@@ -133,7 +136,7 @@ resources:
     ItemsDynamoDbTable:
       Type: 'AWS::DynamoDB::Table'
       Properties:
-        TableName: ${self:provider.environment.DYNAMODB_TABLE_ITEM}
+        TableName: ${self:provider.environment.ITEMS_TABLE}
         AttributeDefinitions:
           - AttributeName: itemId
             AttributeType: S
